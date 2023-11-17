@@ -15,13 +15,14 @@ import java.util.Calendar;
 
 public class AddActivity extends AppCompatActivity {
 
-    private EditText editTextName, editTextEmail;
-    private TextView textViewDOB;
-    private RadioGroup radioGroup;
-    private ImageView imageView1, imageView2, imageView3;
-    private Button buttonSave;
-    private DatabaseHelper databaseHelper;
-    private String selectedImagePath = "";
+    public EditText editTextName, editTextEmail;
+    public TextView textViewDOB;
+    public RadioGroup radioGroup;
+    public ImageView imageView1, imageView2, imageView3;
+    public Button buttonSave;
+    public DatabaseHelper databaseHelper;
+    public int selectedImagePath = 0;
+    String path ="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,22 @@ public class AddActivity extends AppCompatActivity {
         textViewDOB = findViewById(R.id.textViewDOB);
         editTextEmail = findViewById(R.id.editTextEmail);
         radioGroup = findViewById(R.id.radioGroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.radioButton1) {
+                    selectedImagePath = R.drawable.vector_1;
+                } else if (checkedId == R.id.radioButton2) {
+                    selectedImagePath = R.drawable.vector_2;
+                } else if (checkedId == R.id.radioButton3) {
+                    selectedImagePath = R.drawable.vector_3;
+                }
+                path = getResources().getResourceEntryName(selectedImagePath);
+                Toast.makeText(AddActivity.this, "Image path set to: " + path, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         imageView1 = findViewById(R.id.imageView1);
         imageView2 = findViewById(R.id.imageView2);
         imageView3 = findViewById(R.id.imageView3);
@@ -39,7 +56,6 @@ public class AddActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
 
         setupDatePicker();
-        setupRadioGroup();
         setupSaveButton();
     }
 
@@ -57,26 +73,20 @@ public class AddActivity extends AppCompatActivity {
         });
     }
 
-    private void setupRadioGroup() {
-        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.radioButton1) {
-                selectedImagePath = "vector_1";
-            } else if (checkedId == R.id.radioButton2) {
-                selectedImagePath = "vector_2";
-            } else if (checkedId == R.id.radioButton3) {
-                selectedImagePath = "vector_3";
-            }
-        });
-    }
+
+
 
     private void setupSaveButton() {
         buttonSave.setOnClickListener(v -> {
-            String name = editTextName.getText().toString();
-            String dob = textViewDOB.getText().toString();
-            String email = editTextEmail.getText().toString();
+            // Lấy thông tin từ các trường nhập liệu
+            String name = editTextName.getText().toString().trim();
+            String dob = textViewDOB.getText().toString().trim();
+            String email = editTextEmail.getText().toString().trim();
 
-            if (!name.isEmpty() && !dob.equals("Click here to select date") && !email.isEmpty() && !selectedImagePath.isEmpty()) {
-                boolean isInserted = databaseHelper.addUser(name, dob, email, selectedImagePath);
+            // Kiểm tra xem tất cả các trường đã được điền
+            if (!name.isEmpty() && !dob.equals("Click here to select date") && !email.isEmpty()) {
+                // Lưu thông tin người dùng vào cơ sở dữ liệu
+                boolean isInserted = databaseHelper.addUser(name, dob, email, path);
                 if (isInserted) {
                     Toast.makeText(AddActivity.this, "Data Inserted", Toast.LENGTH_SHORT).show();
                     finish(); // Quay trở lại activity trước
