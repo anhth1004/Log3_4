@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Tên cơ sở dữ liệu
-    private static final String DATABASE_NAME = "UserDatabase.db";
+    private static final String DATABASE_NAME = "User1Database.db";
 
     // Phiên bản cơ sở dữ liệu
     private static final int DATABASE_VERSION = 1;

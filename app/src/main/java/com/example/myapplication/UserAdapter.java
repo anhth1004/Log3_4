@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,19 +8,22 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     private ArrayList<User> userList;
     private Context context;
+    private OnUserClickListener listener;
 
-    public UserAdapter(ArrayList<User> userList, Context context) {
-        this.userList = userList;
+    public UserAdapter(Context context, ArrayList<User> userList) {
         this.context = context;
+        this.userList = userList;
+    }
+
+    public void setOnUserClickListener(OnUserClickListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -34,33 +36,33 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public void onBindViewHolder(ViewHolder holder, int position) {
         User user = userList.get(position);
         holder.textViewName.setText(user.getName());
-        holder.textViewDOB.setText(user.getDob());
         holder.textViewEmail.setText(user.getEmail());
-        Glide.with(context)
-                .load(user.getImagePath()) // Thay thế 'user.getImagePath()' với URL hoặc đường dẫn hình ảnh
-// R.drawable.placeholder là hình ảnh placeholder
-                .into(holder.imageViewProfile);
+        holder.textViewDob.setText(user.getDob());
 
-        // Cài đặt hình ảnh người dùng (nếu cần)
-        // Ví dụ: holder.imageViewProfile.setImageResource(...);
-
-        holder.buttonView.setOnClickListener(v -> {
-            // Xử lý sự kiện khi nhấn nút View
+        // Sử dụng Glide để hiển thị ảnh
+        holder.imageView.setImageResource(Integer.parseInt(user.getImagePath()));
+        holder.buttonEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onEditClick(user);
+                }
+            }
         });
 
-        holder.buttonEdit.setOnClickListener(v -> {
-            // Chuyển đến UpdateActivity để cập nhật thông tin người dùng
-            Intent intent = new Intent(context, UpdateActivity.class);
-            intent.putExtra("USER_ID", user.getId());
-            context.startActivity(intent);
-        });
-
-        holder.buttonDelete.setOnClickListener(v -> {
-            // Xóa người dùng và cập nhật danh sách
-            DatabaseHelper databaseHelper = new DatabaseHelper(context);
-            databaseHelper.deleteUser(user.getId());
-            userList.remove(position);
-            notifyItemRemoved(position);
+        // Sự kiện cho nút Delete
+        holder.buttonDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int adapterPosition = holder.getAdapterPosition();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    User user = userList.get(adapterPosition);
+                    DatabaseHelper db = new DatabaseHelper(context);
+                    if (db.deleteUser(user.getId())) {
+                        deleteUser(adapterPosition);
+                    }
+                }
+            }
         });
     }
 
@@ -68,21 +70,28 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public int getItemCount() {
         return userList.size();
     }
+    public void deleteUser(int position) {
+        userList.remove(position);
+        notifyItemRemoved(position);
+    }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView imageViewProfile;
-        public TextView textViewName, textViewDOB, textViewEmail;
-        public Button buttonView, buttonEdit, buttonDelete;
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView textViewName, textViewEmail, textViewDob; // Thêm TextView cho DOB
+        public ImageView imageView;
+        public Button buttonEdit, buttonDelete;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            imageViewProfile = itemView.findViewById(R.id.imageViewProfile);
             textViewName = itemView.findViewById(R.id.textViewName);
-            textViewDOB = itemView.findViewById(R.id.textViewDOB);
             textViewEmail = itemView.findViewById(R.id.textViewEmail);
-            buttonView = itemView.findViewById(R.id.buttonView);
+            imageView = itemView.findViewById(R.id.imageViewProfile);
+            textViewDob = itemView.findViewById(R.id.textViewDOB);
             buttonEdit = itemView.findViewById(R.id.buttonEdit);
             buttonDelete = itemView.findViewById(R.id.buttonDelete);
+
         }
+    }
+    public interface OnUserClickListener {
+        void onEditClick(User user);
     }
 }

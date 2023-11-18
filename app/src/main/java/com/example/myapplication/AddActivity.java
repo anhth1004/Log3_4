@@ -32,21 +32,7 @@ public class AddActivity extends AppCompatActivity {
         editTextName = findViewById(R.id.editTextName);
         textViewDOB = findViewById(R.id.textViewDOB);
         editTextEmail = findViewById(R.id.editTextEmail);
-        radioGroup = findViewById(R.id.radioGroup);
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.radioButton1) {
-                    selectedImagePath = R.drawable.vector_1;
-                } else if (checkedId == R.id.radioButton2) {
-                    selectedImagePath = R.drawable.vector_2;
-                } else if (checkedId == R.id.radioButton3) {
-                    selectedImagePath = R.drawable.vector_3;
-                }
-                path = getResources().getResourceEntryName(selectedImagePath);
-                Toast.makeText(AddActivity.this, "Image path set to: " + path, Toast.LENGTH_SHORT).show();
-            }
-        });
+
 
 
         imageView1 = findViewById(R.id.imageView1);
@@ -82,6 +68,21 @@ public class AddActivity extends AppCompatActivity {
             String name = editTextName.getText().toString().trim();
             String dob = textViewDOB.getText().toString().trim();
             String email = editTextEmail.getText().toString().trim();
+            radioGroup = findViewById(R.id.radioGroup);
+            RadioButton setCheckRdb = findViewById(radioGroup.getCheckedRadioButtonId());
+
+            if (setCheckRdb == findViewById(R.id.radioButton1))
+            {
+                path = String.valueOf(R.drawable.vector_1);
+            }
+            else if (setCheckRdb == findViewById(R.id.radioButton2))
+            {
+                path = String.valueOf(R.drawable.vector_2);
+            }
+            else {
+                path = String.valueOf(R.drawable.vector_3);
+            }
+
 
             // Kiểm tra xem tất cả các trường đã được điền
             if (!name.isEmpty() && !dob.equals("Click here to select date") && !email.isEmpty()) {
